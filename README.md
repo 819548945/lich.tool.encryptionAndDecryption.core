@@ -10,7 +10,7 @@
 * 支持国密、RSA证书本地 生成、签发、签名\验签、加密\解密
 * 支持国密单\双证 CA签发模式
 * 支持RSA  CA签发模式
-* 支持MD5\SHA\SM3等散列算法
+* 支持MD5\SHA\SM3等摘要算法
 * 支持AES\DES\SM4等对称加密算法
 
 git：  https://github.com/819548945/tool.encryptionAndDecryption.core
