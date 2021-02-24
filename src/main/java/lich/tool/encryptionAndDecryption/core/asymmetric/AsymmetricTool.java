@@ -17,7 +17,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
@@ -299,7 +298,6 @@ public class AsymmetricTool extends Base{
 		ASN1EncodableVector	sm2sign=new ASN1EncodableVector();
 		sm2sign.add(new ASN1Integer(new BigInteger(1,r)));
 		sm2sign.add(new ASN1Integer(new BigInteger(1,s)));
-		System.out.println(Base64.encodeBase64String(new DERSequence(sm2sign).getEncoded()));
 		return new DERSequence(sm2sign).getEncoded();
 	}
 }
