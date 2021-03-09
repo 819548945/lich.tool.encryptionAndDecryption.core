@@ -195,7 +195,7 @@ public class AsymmetricTool extends Base{
     		}
     		verifier = Signature.getInstance(algorithm, BC);
             verifier.setParameter(parameterSpec);
-            if(sign.length<67)sign=RSToSM2Signature(sign);
+            sign=sign.length<67?RSToSM2Signature(sign):RSToSM2Signature(SM2SignatureToRS(sign));
     	}else if(publicKey.getAlgorithm().equals(ProviderMode.Asymmetric.RSA.KeyPairGenerator.RSA)){
     		if(!ProviderMode.Check.contains(ProviderMode.Asymmetric.RSA.Signature.class, algorithm)) {
     			throw new EncryptionAndDecryptionException(publicKey.getAlgorithm()+"不支持"+algorithm+" verify");
