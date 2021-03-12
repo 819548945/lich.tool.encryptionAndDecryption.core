@@ -70,9 +70,11 @@
             <activation>
                 <jdk>[1.7,)</jdk>
             </activation>
-           <properties>
+	        <!--
+	        <properties>
 				<additionalparam>-Xdoclint:none</additionalparam>
 			</properties>
+			-->
             <distributionManagement>
                 <snapshotRepository>
                     <!--id 要与setting.xml server id一致-->
