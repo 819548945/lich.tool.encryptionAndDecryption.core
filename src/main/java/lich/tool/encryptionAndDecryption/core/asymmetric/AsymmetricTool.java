@@ -26,6 +26,7 @@ import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jcajce.spec.SM2ParameterSpec;
+import org.bouncycastle.util.encoders.Hex;
 
 import lich.tool.encryptionAndDecryption.EncryptionAndDecryptionException;
 import lich.tool.encryptionAndDecryption.ProviderMode;
@@ -280,8 +281,8 @@ public class AsymmetricTool extends Base{
 		DLSequence sequence = (DLSequence) (new ASN1InputStream(new ByteArrayInputStream(b))).readObject();
 		byte[] r=	((ASN1Integer)sequence.getObjectAt(0)).getValue().toByteArray();
 		byte[] s=	((ASN1Integer)sequence.getObjectAt(1)).getValue().toByteArray();
-		System.arraycopy(r, r[0]==0x0?1:0, sign,0, 32);
-		System.arraycopy(s, s[0]==0x0?1:0, sign,32, 32);
+		System.arraycopy(r, r[0]==0x0?1:0, sign,0,r[0]==0x0?r.length-1:r.length);
+		System.arraycopy(s, s[0]==0x0?1:0, sign,32, s[0]==0x0?s.length-1:s.length);
 		return sign;
 	}
 	/**

@@ -120,8 +120,8 @@ public class PrivateKeyTool  extends Base{
 		byte[] y=	((ASN1Integer)sequence.getObjectAt(1)).getValue().toByteArray();
 		byte[] hash=	((DEROctetString)sequence.getObjectAt(2)).getOctets();
 		enc=	((DEROctetString)sequence.getObjectAt(3)).getOctets();	
-		System.arraycopy(x, x.length==32?0:1,envelopedKeyBlob, 240, 32);
-		System.arraycopy(y, y.length==32?0:1,envelopedKeyBlob, 304, 32);
+		System.arraycopy(x, x.length==32?0:1,envelopedKeyBlob, 240, x[0]==0x0?x.length-1:x.length);
+		System.arraycopy(y, y.length==32?0:1,envelopedKeyBlob, 304, y[0]==0x0?y.length-1:y.length);
 		System.arraycopy(enc, 0, envelopedKeyBlob, 372, 16);
 		envelopedKeyBlob[368]=0x10;
 		System.arraycopy(hash, 0, envelopedKeyBlob, 336, 32);
