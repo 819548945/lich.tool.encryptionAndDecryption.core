@@ -87,16 +87,6 @@ public class PublicKeyTool  extends Base{
 	/**
 	 * 获取p7b证书链上所有证书
 	 * @param p7b p7b p7c bytes
-	 * @return X509Certificate [] 
-	 * @throws CMSException
-	 * @throws CertificateException
-	 * @throws OperatorCreationException 
-	 * @throws CertException 
-	 * @throws EncryptionAndDecryptionException 
-	 */
-	/**
-	 * 获取p7b证书链上所有证书
-	 * @param p7b p7b p7c bytes
 	 * @param isCheckChain 是否校验证书链
 	 * @return  X509Certificate [] 
 	 * @throws CMSException

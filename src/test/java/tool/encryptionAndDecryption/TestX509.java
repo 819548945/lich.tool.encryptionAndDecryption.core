@@ -8,10 +8,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.Test;
 
-import com.sansec.util.encoders.Hex;
 
 import lich.tool.encryptionAndDecryption.asymmetric.OtherObj.PublicKeyInfo;
 import lich.tool.encryptionAndDecryption.core.asymmetric.KeyPairTool;
@@ -41,7 +41,7 @@ public class TestX509 {
 		bx[0]=0x04;
 		String s="8eQEwedQlZBdzMDVO16VxsS81T4qV0Gp4pJfaqGKeivTFvxORkmNuV5kYAUOP1ukO1ZLukPY/UHJcRWaaQTCrw==";
 		System.out.println(s.length());
-		System.out.println(Hex.toHexString(Base64.decodeBase64(s)));
+		System.out.println(Hex.encodeHexString(Base64.decodeBase64(s)));
 		System.arraycopy(Base64.decodeBase64(s), 0, bx, 1,64);
 		
 		

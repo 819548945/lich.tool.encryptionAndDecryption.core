@@ -27,7 +27,6 @@ import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jcajce.spec.SM2ParameterSpec;
 
-import com.sansec.util.encoders.Base64;
 
 import lich.tool.encryptionAndDecryption.EncryptionAndDecryptionException;
 import lich.tool.encryptionAndDecryption.ProviderMode;
