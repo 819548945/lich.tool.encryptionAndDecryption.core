@@ -11,6 +11,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.Test;
 
+import com.sansec.util.encoders.Hex;
+
 import lich.tool.encryptionAndDecryption.asymmetric.OtherObj.PublicKeyInfo;
 import lich.tool.encryptionAndDecryption.core.asymmetric.KeyPairTool;
 import lich.tool.encryptionAndDecryption.core.asymmetric.PublicKeyTool;
@@ -29,15 +31,24 @@ public class TestX509 {
 	private void testRsa() throws ParseException, OperatorCreationException, CertificateException, IOException {
 		KeyPair k=KeyPairTool.generateRSAKeyPair(1204);
 		Date begin=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2021-01-01 00:00:00");
-		Date end=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2021-12-31 23:59:59");
+		Date end=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2030-12-31 23:59:59");
 		PublicKeyInfo publicKeyInfo=new PublicKeyInfo(begin, end, "C=CN , CN=RSATEST");
 		System.out.println("RSA:"+Base64.encodeBase64String(PublicKeyTool.getX509Certificate(publicKeyInfo, k.getPublic()).getEncoded()));	
 	}
 	private void testGM() throws ParseException, OperatorCreationException, CertificateException, IOException {
 		KeyPair k=KeyPairTool.generateGMKeyPair();
+		byte [] bx=new byte[65];
+		bx[0]=0x04;
+		String s="8eQEwedQlZBdzMDVO16VxsS81T4qV0Gp4pJfaqGKeivTFvxORkmNuV5kYAUOP1ukO1ZLukPY/UHJcRWaaQTCrw==";
+		System.out.println(s.length());
+		System.out.println(Hex.toHexString(Base64.decodeBase64(s)));
+		System.arraycopy(Base64.decodeBase64(s), 0, bx, 1,64);
+		
+		
 		Date begin=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2021-01-01 00:00:00");
-		Date end=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2021-12-31 23:59:59");
-		PublicKeyInfo publicKeyInfo=new PublicKeyInfo(begin, end, "C=CN , CN=GMTEST");
-		System.out.println("GM:"+Base64.encodeBase64String(PublicKeyTool.getX509Certificate(publicKeyInfo, k.getPublic()).getEncoded()));	
+		Date end=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2030-12-31 23:59:59");
+		PublicKeyInfo publicKeyInfo=new PublicKeyInfo(begin, end, "C=CN , CN=DIANJU TEST");
+		//System.out.println("GM:"+Base64.encodeBase64String(PublicKeyTool.getX509Certificate(publicKeyInfo, k.getPublic()).getEncoded()));	
+		System.out.println("GM:"+Base64.encodeBase64String(PublicKeyTool.getX509Certificate(publicKeyInfo, PublicKeyTool.toGMPublicKey(bx)).getEncoded()));	
 	}
 }

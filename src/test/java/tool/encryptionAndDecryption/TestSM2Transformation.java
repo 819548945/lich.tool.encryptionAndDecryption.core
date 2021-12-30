@@ -33,9 +33,13 @@ public class TestSM2Transformation {
 		System.out.println("verify:"+AsymmetricTool.verify(sign, ori,Base.getRootGMX509Certificate().getPublicKey(),ProviderMode.Asymmetric.GM.Signature.SM3WITHSM2));
 		enc=AsymmetricTool.SM2CipherToSM2EncDataC1C2C3(enc);
 		System.out.println("enc(C1C2C3):"+Base64.encodeBase64String(enc));
-		System.out.println("ori(c1c2c3):"+new String(AsymmetricTool.decrypt(enc, Base.getRootGMPrivateKey(), ProviderMode.Asymmetric.GM.Cipher.SM2),"utf-8"));
+		//System.out.println("ori(c1c2c3):"+new String(AsymmetricTool.decrypt(enc, Base.getRootGMPrivateKey(), ProviderMode.Asymmetric.GM.Cipher.SM2),"utf-8"));
 		enc=AsymmetricTool.SM2EncDataC1C2C3ToSM2Cipher(enc);
 		System.out.println("enc(C1C2C3->SM2Cipher):"+Base64.encodeBase64String(enc));
-		System.out.println("ori(c1c2c3->SM2Cipher):"+new String(AsymmetricTool.decrypt(enc, Base.getRootGMPrivateKey(), ProviderMode.Asymmetric.GM.Cipher.SM2),"utf-8"));
+		//System.out.println("ori(c1c2c3->SM2Cipher):"+new String(AsymmetricTool.decrypt(enc, Base.getRootGMPrivateKey(), ProviderMode.Asymmetric.GM.Cipher.SM2),"utf-8"));
+		String s1=Base64.encodeBase64String(AsymmetricTool.SM2CipherTOGMC1C3C2(enc));
+		System.out.println("SM2Cipher->GMC1C3C2):"+s1);
+		s1=Base64.encodeBase64String(AsymmetricTool.GMC1C3C2TOSM2Cipher(Base64.decodeBase64(s1)));
+		System.out.println("GMC1C3C2->SM2Cipher):"+s1);
 	}
 }

@@ -26,7 +26,8 @@ import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jcajce.spec.SM2ParameterSpec;
-import org.bouncycastle.util.encoders.Hex;
+
+import com.sansec.util.encoders.Base64;
 
 import lich.tool.encryptionAndDecryption.EncryptionAndDecryptionException;
 import lich.tool.encryptionAndDecryption.ProviderMode;
@@ -99,9 +100,7 @@ public class AsymmetricTool extends Base{
     			throw new EncryptionAndDecryptionException(privateKey.getAlgorithm()+"不支持"+algorithm+" decrypt");
     		}
     		cipher = Cipher.getInstance(algorithm, BC);
-    		if(encodedataByte[0]!=0x04) {
-    			encodedataByte=SM2CipherToSM2EncDataC1C2C3(encodedataByte);
-    		}
+    		encodedataByte=SM2CipherToSM2EncDataC1C2C3(encodedataByte);
     	}else if(privateKey.getAlgorithm().equals(ProviderMode.Asymmetric.RSA.KeyPairGenerator.RSA)){
     		if(!ProviderMode.Check.contains(ProviderMode.Asymmetric.RSA.Cipher.class, algorithm)) {
     			throw new EncryptionAndDecryptionException(privateKey.getAlgorithm()+"不支持"+algorithm+" decrypt");
@@ -228,7 +227,100 @@ public class AsymmetricTool extends Base{
     	return verify(sign,ori, cert.getPublicKey(),cert.getSigAlgName());
     }
     
-	/**
+    
+   /* /**
+	 * SM2加密数据格式转换 
+	 * @param b SM2Cipher
+	 * @return 国密C1C2C3
+	 * @throws IOException
+	 */
+    /*public static byte[]  SM2CipherTOGMC1C2C3(byte[] b) throws IOException{
+    	DLSequence sequence = (DLSequence) (new ASN1InputStream(new ByteArrayInputStream(b))).readObject();
+		byte[] x=	((ASN1Integer)sequence.getObjectAt(0)).getValue().toByteArray();
+		byte[] y=	((ASN1Integer)sequence.getObjectAt(1)).getValue().toByteArray();
+		byte[] hash=	((DEROctetString)sequence.getObjectAt(2)).getOctets();
+		byte[] enc=	((DEROctetString)sequence.getObjectAt(3)).getOctets();
+		int enclen=(enc[0]==0x0)?enc.length-1:enc.length;
+		byte[] encData=new byte[enclen+64*2+32+4];
+		System.arraycopy(x, x[0]==0x0?1:0, encData, 64-(x[0]==0x0?x.length-1:x.length), 64);
+		System.arraycopy(y, y[0]==0x0?1:0, encData, 128-(y[0]==0x0?y.length-1:y.length),64);
+		encData[128]=0x10;
+		System.arraycopy(enc,0, encData, 129,enclen);
+		System.arraycopy(hash,0, encData, encData.length-32,32);
+		return encData;
+    }*/
+  /*  /**
+	 * SM2加密数据格式转换 
+	 * @param b C1C2C3
+	 * @return SM2Cipher
+	 * @throws IOException
+	 */
+	/*public static byte[] GMC1C2C3ToSM2Cipher(byte[] b) throws IOException {	
+		int keylen=b[0]*8;
+		byte[] x=new byte[keylen];
+		byte[] y=new byte[keylen];
+		byte[] hash	=new byte[32];
+		byte[] enc	=new byte[b.length-keylen*2-32-1];		
+		System.arraycopy(b, 1, x, 0, 32);
+		System.arraycopy(b, 33, y, 0, 32);
+		System.arraycopy(b, 65, enc, 0, enc.length);
+		System.arraycopy(b, 65+enc.length, hash, 0, 32);
+		ASN1EncodableVector	sm2enc=new ASN1EncodableVector();
+		sm2enc.add(new ASN1Integer(new BigInteger(1,x)));
+		sm2enc.add(new ASN1Integer(new BigInteger(1,y)));
+		sm2enc.add(new DEROctetString(hash));
+		sm2enc.add(new DEROctetString(enc));
+		return new DERSequence(sm2enc).getEncoded();
+	}*/
+    /**
+   	 * SM2加密数据格式转换 
+   	 * @param b SM2Cipher
+   	 * @return 国密C1C3C2
+   	 * @throws IOException
+   	 */
+     public static byte[]  SM2CipherTOGMC1C3C2(byte[] b) throws IOException{
+       	DLSequence sequence = (DLSequence) (new ASN1InputStream(new ByteArrayInputStream(b))).readObject();
+   		byte[] x=	((ASN1Integer)sequence.getObjectAt(0)).getValue().toByteArray();
+   		byte[] y=	((ASN1Integer)sequence.getObjectAt(1)).getValue().toByteArray();
+   		byte[] hash=	((DEROctetString)sequence.getObjectAt(2)).getOctets();
+   		byte[] enc=	((DEROctetString)sequence.getObjectAt(3)).getOctets();
+   		int enclen=(enc[0]==0x0)?enc.length-1:enc.length;
+   		byte[] encData=new byte[enclen+64*2+32+4];
+   		System.arraycopy(x, x[0]==0x0?1:0, encData, 64-(x[0]==0x0?x.length-1:x.length),x[0]==0x0?x.length-1:x.length );
+   		System.arraycopy(y, y[0]==0x0?1:0, encData, 128-(y[0]==0x0?y.length-1:y.length),x[0]==0x0?x.length-1:x.length);
+   		System.arraycopy(hash,0, encData, 128,32);
+   		encData[160]=(byte) (enclen&0xff);
+   		encData[161]=(byte) (enclen>>8&0xff);
+   		encData[162]=(byte) (enclen>>16&0xff);
+   		encData[163]=(byte) (enclen>>24&0xff);
+   		System.arraycopy(enc,0, encData, 164,enclen);
+   		return encData;
+     }
+     /**
+    	 * SM2加密数据格式转换 
+    	 * @param b 国密C1C3C2
+    	 * @return SM2Cipher
+    	 * @throws IOException
+    	 */
+     public static byte[]   GMC1C3C2TOSM2Cipher(byte[] b) throws IOException{
+		byte[] x=new byte[64];
+		byte[] y=new byte[64];
+		byte[] hash	=new byte[32];
+		byte[] enc	=new byte[b.length-64*2-32-4];		
+		System.arraycopy(b, 0, x, 0, 64);
+		System.arraycopy(b, 64, y, 0, 64);
+		System.arraycopy(b, 128, hash, 0,32);
+		System.arraycopy(b, 128+32+4, enc, 0, b.length-128-32-4);
+		ASN1EncodableVector	sm2enc=new ASN1EncodableVector();
+		sm2enc.add(new ASN1Integer(new BigInteger(1,x)));
+		sm2enc.add(new ASN1Integer(new BigInteger(1,y)));
+		sm2enc.add(new DEROctetString(hash));
+		sm2enc.add(new DEROctetString(enc));
+		return new DERSequence(sm2enc).getEncoded();
+    	
+     }
+    
+     /**
 	 * SM2加密数据格式转换 
 	 * @param b SM2Cipher
 	 * @return C1C2C3
@@ -241,11 +333,12 @@ public class AsymmetricTool extends Base{
 		byte[] hash=	((DEROctetString)sequence.getObjectAt(2)).getOctets();
 		byte[] enc=	((DEROctetString)sequence.getObjectAt(3)).getOctets();
 		int enclen=(enc[0]==0x0)?enc.length-1:enc.length;
-		byte[] encData=new byte[enclen+1+32+32+32];
-		encData[0]=0x4;
-		System.arraycopy(x, x[0]==0x0?1:0, encData, 1, 32);
-		System.arraycopy(y, y[0]==0x0?1:0, encData, 33, 32);
-		System.arraycopy(enc,0, encData, 65,enclen);
+		int keylen=	x.length/8;
+		byte[] encData=new byte[enclen+1+keylen*8*2+32];
+		encData[0]=(byte)keylen;
+		System.arraycopy(x, x[0]==0x0?1:0, encData, 1, keylen*8);
+		System.arraycopy(y, y[0]==0x0?1:0, encData, keylen*8+1, keylen*8);
+		System.arraycopy(enc,0, encData, keylen*8*2+1,enclen);
 		System.arraycopy(hash,0, encData, encData.length-32,32);
 		return encData;
 	}
@@ -256,10 +349,11 @@ public class AsymmetricTool extends Base{
 	 * @throws IOException
 	 */
 	public static byte[] SM2EncDataC1C2C3ToSM2Cipher(byte[] b) throws IOException {	
-		byte[] x=new byte[32];
-		byte[] y=new byte[32];
+		int keylen=b[0]*8;
+		byte[] x=new byte[keylen];
+		byte[] y=new byte[keylen];
 		byte[] hash	=new byte[32];
-		byte[] enc	=new byte[b.length-32-32-32-1];		
+		byte[] enc	=new byte[b.length-keylen*2-32-1];		
 		System.arraycopy(b, 1, x, 0, 32);
 		System.arraycopy(b, 33, y, 0, 32);
 		System.arraycopy(b, 65, enc, 0, enc.length);

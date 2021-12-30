@@ -62,7 +62,7 @@ public class PrivateKeyTool  extends Base{
 	 */
 	public static PrivateKey toGMPrivateKeyByEnvelopedKeyBlob(byte [] doubleprvkey,PrivateKey privateKey) throws Exception {
 		byte[] puk=new byte[65];
-		byte[]	sm2EncData=	CbEncryptedPrivKeygetSM2EncDataC1C2C3(doubleprvkey);
+		byte[]	sm2EncData=	AsymmetricTool.SM2EncDataC1C2C3ToSM2Cipher(CbEncryptedPrivKeygetSM2EncDataC1C2C3(doubleprvkey));
 		byte[] key=AsymmetricTool.decrypt(sm2EncData, privateKey, ProviderMode.Asymmetric.GM.Cipher.SM2WITHSM3);        
 		puk[0]=0x04;
 		System.arraycopy(doubleprvkey,112, puk, 1, 32);
