@@ -1,13 +1,22 @@
 package lich.tool.encryptionAndDecryption.core.asymmetric;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -22,10 +31,16 @@ import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.CertException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
@@ -34,9 +49,12 @@ import org.bouncycastle.jce.X509KeyUsage;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.util.Store;
+import org.bouncycastle.x509.X509Store;
 
 import lich.tool.encryptionAndDecryption.EncryptionAndDecryptionException;
 import lich.tool.encryptionAndDecryption.ProviderMode;
@@ -48,7 +66,7 @@ public class PublicKeyTool  extends Base{
 	 *  x509获取PublicKey
 	 * @param x509Certificate X509Certificate bytes
 	 * @return PublicKey
-	 * @throws IOException
+	 * @throws IOException 
 	 */
 	public static PublicKey x509CertificateToPublicKey(byte [] x509Certificate) throws IOException{
 		X509CertificateHolder	holder = new X509CertificateHolder(x509Certificate);
@@ -66,6 +84,173 @@ public class PublicKeyTool  extends Base{
 		X509CertificateHolder	holder = new X509CertificateHolder(x509Certificate);
 		return new JcaX509CertificateConverter().setProvider(BC).getCertificate(holder);
 	}
+	/**
+	 * 获取p7b证书链上所有证书
+	 * @param p7b p7b p7c bytes
+	 * @return X509Certificate [] 
+	 * @throws CMSException
+	 * @throws CertificateException
+	 * @throws OperatorCreationException 
+	 * @throws CertException 
+	 * @throws EncryptionAndDecryptionException 
+	 */
+	/**
+	 * 获取p7b证书链上所有证书
+	 * @param p7b p7b p7c bytes
+	 * @param isCheckChain 是否校验证书链
+	 * @return  X509Certificate [] 
+	 * @throws CMSException
+	 * @throws CertificateException
+	 * @throws OperatorCreationException
+	 * @throws CertException
+	 * @throws EncryptionAndDecryptionException 证书链校验失败
+	 */
+	public static X509Certificate [] loadP7bToChain(byte [] p7b,boolean isCheckChain) throws CMSException, CertificateException, OperatorCreationException, CertException, EncryptionAndDecryptionException {
+		 CMSSignedData sd = new CMSSignedData(p7b);
+		 Store<X509CertificateHolder> ss=	 sd.getCertificates();
+		 Collection<X509CertificateHolder> x=	 ss.getMatches(null);
+		 Iterator<X509CertificateHolder> iterator=	x.iterator();
+		 X509Certificate [] X509Certificates=new X509Certificate[x.size()];
+		 int i=0;
+		 ContentVerifierProvider cp=null;
+		 while (iterator.hasNext()) {
+				X509CertificateHolder x509CertificateHolder = iterator.next();
+				if(isCheckChain) {
+					if(i==0) {
+						cp=	new JcaContentVerifierProviderBuilder().setProvider(BC).build(x509CertificateHolder);
+						boolean b=x509CertificateHolder.isSignatureValid(cp);
+						if(b!=true) {
+							throw new EncryptionAndDecryptionException("根证校验失败："+x509CertificateHolder.getSubject().toString());
+						}
+					}else {
+						boolean b=x509CertificateHolder.isSignatureValid(cp);
+						if(b!=true) {
+							throw new EncryptionAndDecryptionException("证书链校验失败："+x509CertificateHolder.getSubject().toString());
+						}
+					}	
+				}
+				X509Certificates[i]=new JcaX509CertificateConverter().setProvider(BC).getCertificate(x509CertificateHolder);
+				i++;
+		 }
+		return X509Certificates;  
+	}
+	/**
+	 *  获取p7b证书链上的证书
+	 * @param p7b p7b p7c bytes
+	 * @param isCheckChain 是否校验证书链
+	 * @return X509Certificate
+	 * @throws CMSException
+	 * @throws CertificateException
+	 * @throws OperatorCreationException 
+	 * @throws CertException 
+	 * @throws EncryptionAndDecryptionException 证书链校验失败
+	 */
+	public static X509Certificate loadP7bToX509Certificate(byte [] p7b,boolean isCheckChain) throws CMSException, CertificateException, OperatorCreationException, CertException, EncryptionAndDecryptionException {
+		 CMSSignedData sd = new CMSSignedData(p7b);
+		 Store<X509CertificateHolder> ss=	 sd.getCertificates();
+		 Collection<X509CertificateHolder> x=	 ss.getMatches(null);
+		 Iterator<X509CertificateHolder> iterator=	x.iterator();
+		 X509CertificateHolder x509CertificateHolder=null;
+		 int i=0;
+		 ContentVerifierProvider cp=null;
+		 while (iterator.hasNext()) {
+				x509CertificateHolder = iterator.next();	
+				if(isCheckChain) {
+					if(i==0) {
+						cp=	new JcaContentVerifierProviderBuilder().setProvider(BC).build(x509CertificateHolder);
+						boolean b=x509CertificateHolder.isSignatureValid(cp);
+						if(b!=true) {
+							throw new EncryptionAndDecryptionException("根证校验失败："+x509CertificateHolder.getSubject().toString());
+						}
+					}else {
+						boolean b=x509CertificateHolder.isSignatureValid(cp);
+						if(b!=true) {
+							throw new EncryptionAndDecryptionException("证书链校验失败："+x509CertificateHolder.getSubject().toString());
+						}
+					}	
+				}
+				i++;
+		 }
+		return new JcaX509CertificateConverter().setProvider(BC).getCertificate(x509CertificateHolder);  
+	}
+	/**
+	 *  证书列表转换证书链
+	 * @param certificateChain 证书列表
+	 * @param isCheckChain 是否校验证书链
+	 * @return X509Certificate
+	 * @throws CMSException
+	 * @throws OperatorCreationException 
+	 * @throws CertificateException
+	 * @throws CertException 
+	 * @throws EncryptionAndDecryptionException 证书链校验失败
+	 */
+	public static byte[] certificateChainToP7b(X509Certificate [] certificateChain,boolean isCheckChain) throws CMSException, IOException, OperatorCreationException, CertificateException, CertException, EncryptionAndDecryptionException {
+		CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+	    CMSProcessableByteArray msg = new CMSProcessableByteArray("".getBytes());
+	    int i=0;
+	    ContentVerifierProvider cp=null;
+	    for(X509Certificate x509Certificate : certificateChain) {
+	    	X509CertificateHolder x509CertificateHolder = new X509CertificateHolder(x509Certificate.getEncoded());
+	    	if(i==0) {
+				cp=	new JcaContentVerifierProviderBuilder().setProvider(BC).build(x509CertificateHolder);
+				boolean b=x509CertificateHolder.isSignatureValid(cp);
+				if(b!=true) {
+					throw new EncryptionAndDecryptionException("根证校验失败："+x509CertificateHolder.getSubject().toString());
+				}
+			}else {
+				boolean b=x509CertificateHolder.isSignatureValid(cp);
+				if(b!=true) {
+					throw new EncryptionAndDecryptionException("证书链校验失败："+x509CertificateHolder.getSubject().toString());
+				}
+			}
+	    	i++;
+		}
+	    JcaCertStore store = new JcaCertStore(Arrays.asList(certificateChain));
+	    gen.addCertificates(store);
+	    CMSSignedData signedData = gen.generate(msg);
+	    return signedData.getEncoded();
+	}
+	/**
+	 * 证书列表转换证书链
+	 * @param certificateChain [i][证书bytes]
+	 * @param isCheckChain
+	 * @return p7b bytes
+	 * @throws CMSException
+	 * @throws IOException
+	 * @throws OperatorCreationException
+	 * @throws CertificateException
+	 * @throws CertException
+	 * @throws EncryptionAndDecryptionException
+	 */
+	public static byte[] certificateChainToP7b(byte [][] certificateChain,boolean isCheckChain) throws CMSException, IOException, OperatorCreationException, CertificateException, CertException, EncryptionAndDecryptionException {
+		CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+	    CMSProcessableByteArray msg = new CMSProcessableByteArray("".getBytes());
+	    int i=0;
+	    ContentVerifierProvider cp=null;
+	    List l=new ArrayList();
+	    for(byte [] x509Certificate : certificateChain) {
+	    	X509CertificateHolder x509CertificateHolder = new X509CertificateHolder(x509Certificate);
+	    	l.add(x509CertificateHolder);
+	    	if(i==0) {
+				cp=	new JcaContentVerifierProviderBuilder().setProvider(BC).build(x509CertificateHolder);
+				boolean b=x509CertificateHolder.isSignatureValid(cp);
+				if(b!=true) {
+					throw new EncryptionAndDecryptionException("根证校验失败："+x509CertificateHolder.getSubject().toString());
+				}
+			}else {
+				boolean b=x509CertificateHolder.isSignatureValid(cp);
+				if(b!=true) {
+					throw new EncryptionAndDecryptionException("证书链校验失败："+x509CertificateHolder.getSubject().toString());
+				}
+			}
+	    	i++;
+		}
+	    JcaCertStore store = new JcaCertStore(l);
+	    gen.addCertificates(store);
+	    CMSSignedData signedData = gen.generate(msg);
+	    return signedData.getEncoded();
+	}
+	
 	
 	/**
 	 * 生成公钥证书

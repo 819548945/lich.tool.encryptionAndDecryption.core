@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.819548945</groupId>
   <artifactId>tool.encryptionAndDecryption.core</artifactId>
-  <version>0.1.5</version>
+  <version>0.1.6</version>
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
@@ -141,6 +141,9 @@
 					        <aggregate>true</aggregate>
 					        <charset>${chartset.UTF8}</charset>
 					        <docencoding>${chartset.UTF8}</docencoding>
+					        <additionalparam>-Xdoclint:none</additionalparam>
+					        <additionalOptions>-Xdoclint:none</additionalOptions>
+					        <additionalJOption>-Xdoclint:none</additionalJOption>
 					    </configuration>
 					    <executions>
 					        <execution>

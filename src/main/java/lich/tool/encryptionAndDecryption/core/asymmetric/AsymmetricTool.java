@@ -117,6 +117,7 @@ public class AsymmetricTool extends Base{
      * 签名
      * @param ori 原文
      * @param privateKey 私钥
+     * @param algorithm 摘要算法
      * @return 签名值
      * @throws CryptoException
      * @throws NoSuchAlgorithmException
