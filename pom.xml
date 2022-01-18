@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.819548945</groupId>
   <artifactId>tool.encryptionAndDecryption.core</artifactId>
-  <version>0.1.7</version>
+  <version>0.1.9</version>
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>

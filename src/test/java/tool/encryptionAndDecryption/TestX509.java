@@ -29,7 +29,7 @@ public class TestX509 {
 		testGM();
 	}
 	private void testRsa() throws ParseException, OperatorCreationException, CertificateException, IOException {
-		KeyPair k=KeyPairTool.generateRSAKeyPair(1204);
+		KeyPair k=KeyPairTool.generateRSAKeyPair(1024);
 		Date begin=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2021-01-01 00:00:00");
 		Date end=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2030-12-31 23:59:59");
 		PublicKeyInfo publicKeyInfo=new PublicKeyInfo(begin, end, "C=CN , CN=RSATEST");

@@ -25,6 +25,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
 
 import lich.tool.encryptionAndDecryption.EncryptionAndDecryptionException;
 import lich.tool.encryptionAndDecryption.ProviderMode;
@@ -42,7 +43,18 @@ public class PrivateKeyTool  extends Base{
 		ECPrivateKeyParameters ecp=	new ECPrivateKeyParameters(new BigInteger(1,d),ecDomainParameters);
 		return	 new BCECPrivateKey("EC", ecp,(BCECPublicKey)PublicKeyTool.toGMPublicKey(P),(ECParameterSpec)null,BouncyCastleProvider.CONFIGURATION);	
 	}
-	
+	/**
+	 * 获取私钥
+	 * @param privateKey 私钥
+	 * @return GM d RSA p8
+	 */
+	public static byte[] getPrivateKeyBytes(PrivateKey privateKey) {
+		if(privateKey instanceof BCECPrivateKey) {
+			return	((BCECPrivateKey)privateKey).getD().toByteArray();
+		}else {
+			return privateKey.getEncoded();
+		}
+	}
 	
 	/**
 	 * GM私钥加载（使用内置密钥解密）
