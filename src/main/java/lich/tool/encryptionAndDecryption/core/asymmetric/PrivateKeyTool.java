@@ -159,11 +159,11 @@ public class PrivateKeyTool  extends Base{
 	 */
 	public static PrivateKey toGMPrivateKeyBySignedAndEnvelopedData(byte [] doubleprvkey,PrivateKey privateKey,byte[] puk) throws Exception{
 		DLSequence sequence = (DLSequence) new ASN1InputStream(new ByteArrayInputStream(doubleprvkey)).readObject();
-		DLSequence pukeinfo = (DLSequence)(((DLTaggedObject)sequence.getObjectAt(1)).getObject());
+		DLSequence pukeinfo = (DLSequence)(((DLTaggedObject)sequence.getObjectAt(1)).getBaseObject());
 		DLSequence pukeinfo1=(DLSequence)((DLSet)pukeinfo.getObjectAt(1)).getObjectAt(0);
 		DLSequence puke=(DLSequence)new ASN1InputStream(new ByteArrayInputStream(((DEROctetString)(pukeinfo1.getObjectAt(3))).getOctets())).readObject();
 		byte[] key=AsymmetricTool.decrypt(puke.getEncoded(), privateKey, ProviderMode.Asymmetric.GM.Cipher.SM2WITHSM3);
-		byte[] cbEncryptedPrivKey=((DEROctetString)((DERTaggedObject)((DERSequence)pukeinfo.getObjectAt(3)).getObjectAt(2)).getObject()).getOctets();
+		byte[] cbEncryptedPrivKey=((DEROctetString)((DERTaggedObject)((DERSequence)pukeinfo.getObjectAt(3)).getObjectAt(2)).getBaseObject()).getOctets();
 		byte[] prk=(((DERSequence)pukeinfo.getObjectAt(3)).getObjectAt(1)).toString().equals("[1.2.156.10197.1.102]")?getSm1ext().decrypt(cbEncryptedPrivKey,key):getSm4ext().decrypt(cbEncryptedPrivKey,key);			
 		byte[] nprk=new byte[prk[0]==0x1?33:32];
 		System.arraycopy(prk, 32, nprk, prk[0]==0x1?1:0, 32);

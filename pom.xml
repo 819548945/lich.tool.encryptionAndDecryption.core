@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.819548945</groupId>
   <artifactId>tool.encryptionAndDecryption.core</artifactId>
-  <version>0.1.8</version>
+  <version>0.1.9</version>
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
@@ -36,13 +36,13 @@
     </dependency>
     <dependency>
 	    <groupId>org.bouncycastle</groupId>
-	    <artifactId>bcprov-jdk15on</artifactId>
-	    <version>1.68</version>
+	    <artifactId>bcprov-jdk18on</artifactId>
+	    <version>1.76</version>
 	</dependency>
 		<dependency>
 	    <groupId>org.bouncycastle</groupId>
-	    <artifactId>bcpkix-jdk15on</artifactId>
-	    <version>1.68</version>
+	    <artifactId>bcpkix-jdk18on</artifactId>
+	    <version>1.76</version>
 	</dependency>
 	<dependency>
 	    <groupId>commons-codec</groupId>
