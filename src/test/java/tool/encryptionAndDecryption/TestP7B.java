@@ -19,8 +19,8 @@ public class TestP7B {
 	}
 	@Test
 	public void test() throws Exception {
-		Date begin=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2021-01-01 00:00:00");
-		Date end=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2021-12-31 23:59:59");
+		Date begin=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-01-01 00:00:00");
+		Date end=	new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-12-31 23:59:59");
 		PublicKeyInfo publicKeyInfo=new PublicKeyInfo(begin, end, "C=CN , CN=GMTEST");
 		System.out.println("-----------certificateChainToP7b-----------");
 		X509Certificate x509c=PublicKeyTool.getX509Certificate(publicKeyInfo, KeyPairTool.generateGMKeyPair().getPublic())	;

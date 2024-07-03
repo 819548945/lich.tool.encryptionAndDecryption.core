@@ -271,6 +271,22 @@ public class AsymmetricTool extends Base{
 		sm2enc.add(new DEROctetString(enc));
 		return new DERSequence(sm2enc).getEncoded();
 	}*/
+    public static byte[] SM2CipherToEncDataC1C3C2(byte[] b) throws IOException {	
+		DLSequence sequence = (DLSequence) (new ASN1InputStream(new ByteArrayInputStream(b))).readObject();
+		byte[] x=	((ASN1Integer)sequence.getObjectAt(0)).getValue().toByteArray();
+		byte[] y=	((ASN1Integer)sequence.getObjectAt(1)).getValue().toByteArray();
+		byte[] hash=	((DEROctetString)sequence.getObjectAt(2)).getOctets();
+		byte[] enc=	((DEROctetString)sequence.getObjectAt(3)).getOctets();
+		int enclen=(enc[0]==0x0)?enc.length-1:enc.length;
+		int keylen=	x.length/8;
+		byte[] encData=new byte[enclen+1+keylen*8*2+32];
+		encData[0]=(byte)keylen;
+		System.arraycopy(x, x[0]==0x0?1:0, encData, 1, keylen*8);
+		System.arraycopy(y, y[0]==0x0?1:0, encData, keylen*8+1, keylen*8);
+		System.arraycopy(hash,0, encData, 2*keylen*8+1,32);
+		System.arraycopy(enc,0, encData, 2*keylen*8+1+32,enclen);	
+		return encData;
+	}
     /**
    	 * SM2加密数据格式转换 
    	 * @param b SM2Cipher
@@ -341,6 +357,29 @@ public class AsymmetricTool extends Base{
 		System.arraycopy(hash,0, encData, encData.length-32,32);
 		return encData;
 	}
+	  /**
+		 * SM2加密数据格式转换 
+		 * @param b SM2Cipher
+		 * @return C1C3C2
+		 * @throws IOException
+		 */
+	public static byte[] SM2CipherToSM2EncDataC1C3C2(byte[] b) throws IOException {	
+		DLSequence sequence = (DLSequence) (new ASN1InputStream(new ByteArrayInputStream(b))).readObject();
+		byte[] x=	((ASN1Integer)sequence.getObjectAt(0)).getValue().toByteArray();
+		byte[] y=	((ASN1Integer)sequence.getObjectAt(1)).getValue().toByteArray();
+		byte[] hash=	((DEROctetString)sequence.getObjectAt(2)).getOctets();
+		byte[] enc=	((DEROctetString)sequence.getObjectAt(3)).getOctets();
+		int enclen=(enc[0]==0x0)?enc.length-1:enc.length;
+		int keylen=	x.length/8;
+		byte[] encData=new byte[enclen+1+keylen*8*2+32];
+		encData[0]=(byte)keylen;
+		System.arraycopy(x, x[0]==0x0?1:0, encData, 1, keylen*8);
+		System.arraycopy(y, y[0]==0x0?1:0, encData, keylen*8+1, keylen*8);
+		System.arraycopy(hash,0, encData, 2*keylen*8+1,32);
+		System.arraycopy(enc,0, encData, 2*keylen*8+1+32,enclen);	
+		return encData;
+	}
+	
 	/**
 	 * SM2加密数据格式转换 
 	 * @param b C1C2C3
