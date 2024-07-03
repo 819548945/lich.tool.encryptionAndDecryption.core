@@ -15,7 +15,7 @@
 
 git：  https://github.com/819548945/tool.encryptionAndDecryption.core
 
-文档： http://doc.lich.tk/0.1.x/encryptionAndDecryption.core.html
+文档： http://doc.lich.me/0.1.x/encryptionAndDecryption.core.html
 
 bug、意见反馈: liuchao_@outlook.com
 
